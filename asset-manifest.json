@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/ThavThav_Store/static/css/main.b0723b0b.css",
+    "main.js": "/ThavThav_Store/static/js/main.251cb63e.js",
+    "static/js/453.cc8f31e6.chunk.js": "/ThavThav_Store/static/js/453.cc8f31e6.chunk.js",
+    "index.html": "/ThavThav_Store/index.html",
+    "main.b0723b0b.css.map": "/ThavThav_Store/static/css/main.b0723b0b.css.map",
+    "main.251cb63e.js.map": "/ThavThav_Store/static/js/main.251cb63e.js.map",
+    "453.cc8f31e6.chunk.js.map": "/ThavThav_Store/static/js/453.cc8f31e6.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.b0723b0b.css",
+    "static/js/main.251cb63e.js"
+  ]
+}
