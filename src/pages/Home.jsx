@@ -5,14 +5,12 @@ import { Navigation, Pagination, Scrollbar, A11y } from 'swiper/modules';
 
 import { Swiper, SwiperSlide } from 'swiper/react';
 
-import axios from 'axios';
-
 // Import Swiper styles
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import 'swiper/css/scrollbar';
-
+import { FetchProducts } from "../fetchProducts";
 
 
 function Home() {
@@ -20,13 +18,12 @@ function Home() {
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      const { data } = await axios.get('https://fakestoreapi.com/products');
-      setProducts(data);
-    };
-
-    fetchProducts();
-  }, []);
+      const getProducts = async () => {
+        const data = await FetchProducts();
+        setProducts(data); // Properly store products in state
+      };
+      getProducts();
+    }, []);
   
 
   return (
@@ -130,39 +127,47 @@ function Home() {
       navigation
       // pagination={{ clickable: true }}
     >
-      {products.map((product, index) => {
-        return(
-          <SwiperSlide><div className="item-slick1" 
-          style={{ 
-            backgroundImage: `url(${product.image})`, 
-            backgroundSize:'contain' , 
-            width: '90%',
-            backgroundPositionX: 'right'
-            }}>
-					<div className="container h-full">
-						<div className="flex-col-l-m h-full p-t-100 p-b-30 respon5">
-							<div className="layer-slick1 animated " >
-								<span className="ltext-101 cl2 respon2">
-									New Collection 2024
-								</span>
-							</div>
-								
-							<div className="layer-slick1 animated " >
-								<h2 className="ltext-201 cl2 p-t-19 p-b-43 respon1">
-									NEW SEASON
-								</h2>
-							</div>
-								
-							<div className="layer-slick1 animated ">
-								<a href="products" className="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04">
-									Shop Now
-								</a>
-							</div>
-						</div>
-					</div>
-				</div></SwiperSlide>
-        )
-      })}
+              {products.map((product, index) => (
+                <SwiperSlide key={index}>
+                  <div
+                    className="item-slick1"
+                    style={{
+                      backgroundImage: `url("http://localhost:3010/uploads/products/${product.photo}")`,
+                      backgroundSize: 'contain',
+                      backgroundPosition: 'right',
+                      backgroundRepeat: 'no-repeat',
+                      width: '100%',
+                      height: '600px' 
+                    }}
+                  >
+                    <div className="container h-full">
+                      <div className="flex-col-l-m h-full p-t-100 p-b-30 respon5">
+                        <div className="layer-slick1 animated">
+                          <span className="ltext-101 cl2 respon2">
+                            New Collection 2024
+                          </span>
+                        </div>
+
+                        <div className="layer-slick1 animated">
+                          <h2 className="ltext-201 cl2 p-t-19 p-b-43 respon1">
+                            {product.name}
+                          </h2>
+                        </div>
+
+                        <div className="layer-slick1 animated">
+                          <a
+                            href="products"
+                            className="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04"
+                          >
+                            Shop Now
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </SwiperSlide>
+              ))}
+
       {/* <SwiperSlide><div className="item-slick1" style={{ backgroundImage: 'url(images/slide-02.jpg)' }}>
 					<div className="container h-full">
 						<div className="flex-col-l-m h-full p-t-100 p-b-30 respon5">

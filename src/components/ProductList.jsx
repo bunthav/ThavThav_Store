@@ -1,3 +1,5 @@
+//no use
+
 import React from 'react'
 
 function ProductList({ onAddToCart }) {

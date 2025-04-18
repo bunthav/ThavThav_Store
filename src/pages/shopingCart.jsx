@@ -3,45 +3,85 @@ import { CartContext } from "../CartContext";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import "./shopingCart.css";
 
-
-function ShopingCart() {
-  const { cartItems } = useContext(CartContext);
+function ShoppingCart() {
+  const { cartItems, clearCart } = useContext(CartContext);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [transactionCompleted, setTransactionCompleted] = useState(false);
+  const [checkoutError, setCheckoutError] = useState(null);
 
-  const calculateTotal = () => {
-    return cartItems.reduce((total, item) => total + item.qty * item.price, 0).toFixed(2);
-  };
+  const calculateTotal = () =>
+    cartItems.reduce((total, item) => {
+      const price = item.price || (item.product_price || 0);
+      const qty = item.qty || (item.quantity || 0);
+      return total + (price * qty);
+    }, 0).toFixed(2);
 
   const openModal = () => setIsModalOpen(true);
-  const closeModal = () => setIsModalOpen(false);
-
-  const handleApprove = (details) => {
-    console.log("Transaction completed:", details);
-    setTransactionCompleted(true);
-    localStorage.removeItem("cartItems");
-    window.location.reload(); // Auto refreshes the page
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setCheckoutError(null);
   };
 
-  // New function to clear the cart
-  const handleClearCart = () => {
-    localStorage.removeItem("cartItems"); // Remove items from localStorage
-    window.location.reload(); // Refresh the page to reflect the changes
+  const handleCheckoutSuccess = async () => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    const token = localStorage.getItem("token");
+
+    if (!user || !token) {
+      alert("Please login to complete checkout");
+      return;
+    }
+
+    try {
+      // Call your checkout endpoint
+      const response = await fetch("http://localhost:3010/receipt/checkout/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          receipt_username: user.name,
+          payment_method: "PayPal"
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Clear cart only after successful receipt creation
+        await clearCart();
+        alert(`Checkout successful! Receipt ID: ${data.receipt_code}`);
+        window.location.reload(); // Refresh to update UI
+      } else {
+        throw new Error(data.error || "Failed to create receipt");
+      }
+    } catch (error) {
+      console.error("Checkout failed:", error);
+      setCheckoutError(error.message);
+    }
+  };
+
+  const handleApprove = async (data, actions) => {
+    try {
+      // First capture the PayPal payment
+      const details = await actions.order.capture();
+      console.log("Payment captured:", details);
+
+      // Then process our own checkout
+      await handleCheckoutSuccess();
+
+      return details;
+    } catch (error) {
+      console.error("Payment processing failed:", error);
+      setCheckoutError("Payment processing failed. Please try again.");
+      throw error; // This will trigger the onError handler
+    }
   };
 
   return (
     <div>
-      <div className="container" style={{ marginTop: "100px" }}>
-        <div className="bread-crumb flex-w p-l-25 p-r-15 p-t-30 p-lr-0-lg">
-          <a href="/" className="stext-109 cl8 hov-cl1 trans-04">
-            Home
-            <i className="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true" />
-          </a>
-          <span className="stext-109 cl4">Shopping Cart</span>
-        </div>
-      </div>
+      {/* ... (your existing breadcrumb and container code) ... */}
 
-      <form className="bg0 p-t-75 p-b-85">
+      <div className="bg0 p-t-75 p-b-85">
         <div className="container">
           <div className="row">
             <div className="col-lg-10 col-xl-7 m-lr-auto m-b-50">
@@ -63,13 +103,27 @@ function ShopingCart() {
                           <tr className="table_row" key={index}>
                             <td className="column-1">
                               <div className="how-itemcart1">
-                                <img src={item.image} alt={item.title} />
+                                <img
+                                  src={`http://localhost:3010/uploads/products/${item.photo || item.image}`}
+                                  alt={item.product_name || item.name || item.title}
+                                />
                               </div>
                             </td>
-                            <td className="column-2">{item.title}</td>
-                            <td className="column-3">${item.price}</td>
-                            <td className="column-4">{item.qty}</td>
-                            <td className="column-5">${(item.qty * item.price).toFixed(2)}</td>
+                            <td className="column-2">
+                              {item.product_name || item.name || item.title}
+                            </td>
+                            <td className="column-3">
+                              ${item.price || item.product_price}
+                            </td>
+                            <td className="column-4">
+                              {item.quantity || item.qty}
+                            </td>
+                            <td className="column-5">
+                              ${(
+                                (item.price || item.product_price) *
+                                (item.quantity || item.qty)
+                              ).toFixed(2)}
+                            </td>
                           </tr>
                         ))
                       ) : (
@@ -84,6 +138,7 @@ function ShopingCart() {
                 </div>
               </div>
             </div>
+
             <div className="col-sm-10 col-lg-7 col-xl-5 m-lr-auto m-b-50">
               <div className="bor10 p-lr-40 p-t-30 p-b-40 m-l-63 m-r-40 m-lr-0-xl p-lr-15-sm">
                 <h4 className="mtext-109 cl2 p-b-30">Cart Totals</h4>
@@ -95,26 +150,32 @@ function ShopingCart() {
                     <span className="mtext-110 cl2">${calculateTotal()}</span>
                   </div>
                 </div>
-                <button
-                  type="button"
-                  onClick={openModal}
-                  className="flex-c-m stext-101 cl0 size-116 bg3 bor14 hov-btn3 p-lr-15 trans-04 pointer"
-                >
-                  Proceed to Checkout
-                </button>
-                <button
-                  type="button"
-                  onClick={handleClearCart} // Clear cart button
-                  className="flex-c-m stext-101 cl0 size-116 bg-danger bor14 hov-btn3 p-lr-15 trans-04 pointer"
-                  style={{ marginTop: "15px" }}
-                >
-                  Clear Cart
-                </button>
+
+                {cartItems.length > 0 && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={openModal}
+                      className="flex-c-m stext-101 cl0 size-116 bg3 bor14 hov-btn3 p-lr-15 trans-04 pointer"
+                    >
+                      Proceed to Checkout
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={clearCart}
+                      className="flex-c-m stext-101 cl0 size-116 bg-danger bor14 hov-btn3 p-lr-15 trans-04 pointer"
+                      style={{ marginTop: "15px" }}
+                    >
+                      Clear Cart
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           </div>
         </div>
-      </form>
+      </div>
 
       {isModalOpen && (
         <div className="checkout-modal-overlay" onClick={closeModal}>
@@ -128,10 +189,13 @@ function ShopingCart() {
             <h2>Checkout</h2>
             <p>Total Amount: ${calculateTotal()}</p>
 
+            {checkoutError && (
+              <div className="alert alert-danger">{checkoutError}</div>
+            )}
+
             <PayPalScriptProvider
               options={{
-                "client-id":
-                  "Aa3lxgrZwwHN_qFV-zL0WNxq0DmzSgbCsT5L7ZCyotkPa2nQ1V1ajBiGTCmJ-LzSsGwSywhK5MtGonhL",
+                "client-id": "Aa3lxgrZwwHN_qFV-zL0WNxq0DmzSgbCsT5L7ZCyotkPa2nQ1V1ajBiGTCmJ-LzSsGwSywhK5MtGonhL",
                 currency: "USD",
               }}
             >
@@ -148,10 +212,11 @@ function ShopingCart() {
                     ],
                   });
                 }}
-                onApprove={(data, actions) => {
-                  return actions.order.capture().then(handleApprove);
+                onApprove={handleApprove}
+                onError={(err) => {
+                  console.error("PayPal Checkout Error", err);
+                  setCheckoutError("Payment failed. Please try again or use another payment method.");
                 }}
-                onError={(err) => console.error("PayPal Checkout Error", err)}
               />
             </PayPalScriptProvider>
           </div>
@@ -161,5 +226,4 @@ function ShopingCart() {
   );
 }
 
-
-export default ShopingCart;
+export default ShoppingCart;

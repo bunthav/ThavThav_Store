@@ -28,7 +28,7 @@ function Header({ cartCount }) {
                 <a href="Help" className="flex-c-m trans-04 p-lr-25">
                   Help & FAQs
                 </a>
-                <a href="My-Account" className="flex-c-m trans-04 p-lr-25">
+                <a href="http://localhost:3000/login" className="flex-c-m trans-04 p-lr-25">
                   My Account
                 </a>
                 <a href="EN" className="flex-c-m trans-04 p-lr-25">

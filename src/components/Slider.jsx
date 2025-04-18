@@ -1,3 +1,5 @@
+// No use
+
 import React, { useEffect } from 'react';
 import $ from 'jquery';
 import 'slick-carousel/slick/slick.css';

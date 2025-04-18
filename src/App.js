@@ -9,6 +9,9 @@ import Header from "./components/Header.jsx";
 import Footer from "./components/Footer.jsx";
 import ShopingCart from "./pages/shopingCart.jsx";
 import Products from "./pages/Products.jsx";
+import AuthRegister from "./components/Register.jsx";
+import AuthLogin from "./components/Login.jsx";
+
 
 function App() {
   return (
@@ -38,6 +41,8 @@ function AppWithCart() {
         <Route path="/contact" element={<Contact />} />
         <Route path="/shopingCart" element={<ShopingCart />} />
         <Route path="/Products" element={<Products />} />
+        <Route path="/Login" element={< AuthLogin />} />
+        <Route path="/Register" element={< AuthRegister />} />
       </Routes>
     </>
   );
