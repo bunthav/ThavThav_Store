@@ -24,10 +24,10 @@ export const CartProvider = ({ children }) => {
     return new URLSearchParams(data).toString();
   };
 
-  // NEW: Clear entire cart (both database and local)
+  //  Clear entire cart (both database and local)
   const clearCart = async () => {
-  const user = JSON.parse(localStorage.getItem("user"));
-  const token = localStorage.getItem("token");
+    const user = JSON.parse(localStorage.getItem("user"));
+    const token = localStorage.getItem("token");
 
   try {
     // Clear from database if logged in
@@ -49,14 +49,14 @@ export const CartProvider = ({ children }) => {
     // Always clear local storage and state
     setCartItems([]);
     localStorage.removeItem("cartItems");
-    return true; // Indicate success
+    return true; 
   } catch (error) {
     console.error("Failed to clear cart:", error);
-    return false; // Indicate failure
+    return false; 
   }
 };
 
-  // NEW: Fetch cart on mount if user is logged in
+  //  Fetch cart on mount if user is logged in
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user"));
     const token = localStorage.getItem("token");
@@ -195,7 +195,7 @@ export const CartProvider = ({ children }) => {
         addToCart,
         removeFromCart,
         syncCartToDatabase,
-        clearCart, // NEW: Added clearCart to context
+        clearCart, 
       }}
     >
       {children}

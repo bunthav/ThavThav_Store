@@ -31,7 +31,6 @@ function ShoppingCart() {
     }
 
     try {
-      // Call your checkout endpoint
       const response = await fetch("http://localhost:3010/receipt/checkout/", {
         method: "POST",
         headers: {
@@ -73,13 +72,12 @@ function ShoppingCart() {
     } catch (error) {
       console.error("Payment processing failed:", error);
       setCheckoutError("Payment processing failed. Please try again.");
-      throw error; // This will trigger the onError handler
+      throw error; 
     }
   };
 
   return (
     <div>
-      {/* ... (your existing breadcrumb and container code) ... */}
 
       <div className="bg0 p-t-75 p-b-85">
         <div className="container">
